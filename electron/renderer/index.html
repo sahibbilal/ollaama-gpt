@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT-Ollama</title>
+    <link rel="stylesheet" href="css/style.css" onerror="console.warn('CSS file not found, using fallback styles');">
+    <style>
+        /* Fallback styles in case CSS doesn't load */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+        <p>Loading application...</p>
+    </div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" id="newChatBtn">
+                    <span>+</span> New Chat
+                </button>
+            </div>
+            <div class="conversations-list" id="conversationsList">
+                <!-- Conversations will be loaded here -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1>ChatGPT-Ollama</h1>
+                </div>
+                <div class="header-right">
+                    <select id="modelSelect" class="model-select">
+                        <option value="">Loading models...</option>
+                    </select>
+                    <button class="icon-btn" id="installModelsBtn" title="Install Models">📥</button>
+                    <button class="icon-btn" id="dependenciesBtn" title="Check Dependencies">⚙️</button>
+                    <button class="icon-btn" id="themeToggle" title="Toggle Theme">🌙</button>
+                </div>
+            </header>
+            
+            <!-- Dependencies Status Panel -->
+            <div class="dependencies-panel" id="dependenciesPanel" style="display: none;">
+                <div class="dependencies-header">
+                    <h2>Dependencies Status</h2>
+                    <button class="close-btn" id="closeDependenciesBtn">&times;</button>
+                </div>
+                <div class="dependencies-content">
+                    <div class="dependency-item" id="pythonStatus">
+                        <div class="dependency-icon">🐍</div>
+                        <div class="dependency-info">
+                            <div class="dependency-name">Python</div>
+                            <div class="dependency-details">
+                                <span class="status-badge" id="pythonStatusBadge">Checking...</span>
+                                <span class="dependency-version" id="pythonVersion"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dependency-item" id="ollamaStatus">
+                        <div class="dependency-icon">🤖</div>
+                        <div class="dependency-info">
+                            <div class="dependency-name">Ollama</div>
+                            <div class="dependency-details">
+                                <span class="status-badge" id="ollamaStatusBadge">Checking...</span>
+                                <span class="dependency-version" id="ollamaVersion"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dependencies-actions">
+                        <button class="btn-secondary" id="refreshDependenciesBtn">Refresh Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <h2>Welcome to ChatGPT-Ollama</h2>
+                        <p>Select a model and start chatting!</p>
+                    </div>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div class="message-loading" id="messageLoading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span class="loading-text">Generating response...</span>
+                </div>
+                
+                <!-- Scroll to Bottom Button -->
+                <button class="scroll-to-bottom-btn" id="scrollToBottomBtn" style="display: none;" title="Scroll to bottom">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M19 12l-7 7-7-7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        class="message-input" 
+                        placeholder="Type your message here..."
+                        rows="1"
+                    ></textarea>
+                    <button id="sendBtn" class="send-btn" disabled>Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Install Models Modal -->
+    <div class="modal" id="installModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Install Models</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="manual-install-section">
+                    <label for="manualModelInput" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">Install Custom Model:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input 
+                            type="text" 
+                            id="manualModelInput" 
+                            class="manual-model-input" 
+                            placeholder="e.g., flux-schnell, black-forest-labs/flux-pro, llama3:8b"
+                            style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-secondary); color: var(--text-primary);"
+                        />
+                        <button id="installManualBtn" class="btn-secondary" style="padding: 8px 16px;">Install</button>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; margin-bottom: 16px;">
+                        Enter any model name from Ollama's library. Check <a href="https://ollama.com/library" target="_blank" style="color: var(--accent-color);">ollama.com/library</a> for available models.
+                        <br><strong>Note:</strong> For Flux models, try: <code>black-forest-labs/flux</code> or <code>black-forest-labs/flux-pro</code> (availability may vary by region).
+                    </p>
+                </div>
+                <div id="popularModelsList" class="models-list">
+                    <!-- All available models will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="installSelectedBtn" class="btn-primary" disabled>Install Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal Popup -->
+    <div class="modal" id="errorModal" style="display: none;">
+        <div class="modal-content error-modal">
+            <div class="modal-header error-header">
+                <h2 id="errorModalTitle">Error</h2>
+                <button class="modal-close" id="closeErrorModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="error-icon">⚠️</div>
+                <p id="errorModalMessage" class="error-message"></p>
+                <pre id="errorModalDetails" class="error-details" style="display: none;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button id="errorModalOk" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal Popup -->
+    <div class="modal" id="warningModal" style="display: none;">
+        <div class="modal-content warning-modal">
+            <div class="modal-header warning-header">
+                <h2 id="warningModalTitle">Warning</h2>
+                <button class="modal-close" id="closeWarningModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">⚠️</div>
+                <p id="warningModalMessage" class="warning-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="warningModalOk" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js" onerror="console.error('JavaScript file not found!'); document.body.innerHTML='<div style=\'padding:50px;text-align:center;font-family:Arial;\'><h1>Error Loading Application</h1><p>JavaScript file (app.js) not found. Please reinstall the application.</p></div>';"></script>
+</body>
+</html>

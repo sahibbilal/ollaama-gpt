@@ -1,0 +1,69 @@
+{
+  "name": "chatgpt-ollama-desktop",
+  "version": "1.0.0",
+  "description": "ChatGPT-like desktop application using Ollama",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false SKIP_NOTARIZATION=true WIN_CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win"
+  },
+  "keywords": [
+    "chatgpt",
+    "ollama",
+    "ai",
+    "desktop"
+  ],
+  "author": "ChatGPT-Ollama",
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.chatgptollama.desktop",
+    "productName": "ChatGPT-Ollama",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "../main.py",
+      "../config.py",
+      "../requirements.txt",
+      "../utils/**/*",
+      "!../utils/__pycache__/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../",
+        "filter": [
+          "main.py",
+          "config.py",
+          "requirements.txt",
+          "check_dependencies.py",
+          "install_dependencies.py",
+          "launcher.py",
+          "port_config.json",
+          "utils/**/*",
+          "!utils/__pycache__/**/*"
+        ],
+        "to": "app"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "sign": false,
+      "verifyUpdateCodeSignature": false,
+      "signingHashAlgorithms": [],
+      "signDlls": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
