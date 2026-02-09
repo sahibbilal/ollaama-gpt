@@ -82,8 +82,8 @@ A ChatGPT-like desktop application for Windows that uses Ollama for local AI con
    py build/build.py
    ```
    
-   **Note**: If you get symlink permission errors, see [BUILD_TROUBLESHOOTING.md](BUILD_TROUBLESHOOTING.md)
-
+   **Note**: If you get symlink permission errors, enable Developer Mode in Windows Settings or run PowerShell/CMD as Administrator.
+   
 3. **Output:**
    - Electron app: `electron/dist/`
    - Installer: `dist/ChatGPT-Ollama-Setup-1.0.0.exe`
