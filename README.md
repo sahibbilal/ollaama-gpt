@@ -11,9 +11,12 @@ A ChatGPT-like desktop application for Windows that uses Ollama for local AI con
 - 🔄 **Streaming Responses**: Real-time streaming responses
 - 💾 **Local Storage**: All data stored locally in AppData
 - 🚀 **Auto-Install Dependencies**: Automatically installs Python and Ollama if missing
-- 🎨 **Rich Formatting**: Real-time markdown rendering
+- 🎨 **Rich Formatting**: Real-time markdown rendering with proper list and paragraph distinction
 - 📝 **Dynamic Titles**: Conversation titles automatically update from first user message
 - 📥 **Model Installation**: Install popular Ollama models directly from the application
+- ✏️ **Message Editing**: Edit and resend previous messages
+- 🔄 **Auto-scroll**: Smart auto-scrolling during message generation with scroll-to-bottom button
+- ⏱️ **Extended Timeouts**: Configured for long-running model responses (300s timeout)
 
 ## Requirements
 
@@ -48,13 +51,8 @@ A ChatGPT-like desktop application for Windows that uses Ollama for local AI con
 4. **Run the application:**
    
    **Easy way (recommended):**
-   - **Windows**: Double-click `START.bat` or run `START.ps1` in PowerShell
+   - **Windows**: Double-click `START.bat`
    - **Linux/Mac**: Run `./start.sh` (make executable first: `chmod +x start.sh`)
-   
-   **Run in background (close terminal but keep app running):**
-   - **Windows**: Double-click `START_DETACHED.bat` (shows minimized window)
-   - **Windows**: Double-click `START_SILENT.vbs` (completely silent, no window)
-   - To stop: Run `STOP.bat` to stop all processes
    
    **Manual way:**
    ```bash
@@ -68,8 +66,7 @@ A ChatGPT-like desktop application for Windows that uses Ollama for local AI con
    - Start Electron frontend
    - Keep everything running until you close the window
    
-   **Note**: If you use `START.bat`, closing the terminal will stop the app.
-   Use `START_DETACHED.bat` or `START_SILENT.vbs` to keep it running after closing the terminal.
+   **Note**: Closing the terminal window will stop the app. Keep the terminal open while using the application.
 
 ### Building Windows Installer
 
@@ -107,7 +104,6 @@ chatgpt-ollama-desktop/
 ├── main.py                    # Flask backend server
 ├── launcher.py                # Entry point (starts Flask + Electron)
 ├── START.bat                  # Windows batch startup script (double-click to run)
-├── START.ps1                  # Windows PowerShell startup script
 ├── start.sh                   # Linux/Mac startup script
 ├── check_dependencies.py     # Dependency checker
 ├── install_dependencies.py   # Auto-installer
@@ -146,7 +142,8 @@ Create a `.env` file in the project root:
 # Ollama Configuration
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:1b
-OLLAMA_TIMEOUT=60
+OLLAMA_TIMEOUT=300
+OLLAMA_STREAM_READ_TIMEOUT=120
 
 # Flask Configuration
 FLASK_HOST=127.0.0.1
@@ -154,8 +151,8 @@ FLASK_PORT=5000
 FLASK_DEBUG=False
 
 # History Configuration
-MAX_RECENT_MESSAGES=20
-SUMMARY_THRESHOLD=50
+MAX_RECENT_MESSAGES=30
+SUMMARY_THRESHOLD=40
 CONTEXT_WINDOW_SIZE=4096
 ```
 
