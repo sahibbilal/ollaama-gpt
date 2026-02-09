@@ -33,11 +33,8 @@ instance/
 
 # Data
 data/
-# Keep port_config.json template but ignore actual port config
+# Runtime config files
 port_config.json
-# Keep package.json files but ignore other JSON configs
-!package.json
-!package-lock.json
 
 # IDE
 .vscode/
